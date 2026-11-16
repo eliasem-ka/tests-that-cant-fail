@@ -9,10 +9,12 @@ class PriceCalculator {
     fun isEligible(coupon: Coupon, subtotalCents: Long): Boolean =
         subtotalCents >= coupon.minSubtotalCents
 
+    fun subtotal(items: List<CartItem>): Long = items.sumOf { it.unitPriceCents * it.quantity }
+
     fun quote(items: List<CartItem>, coupon: Coupon?, loyaltyPointsCents: Long): Quote {
         if (items.isEmpty()) return Quote.EMPTY
 
-        val subtotal = items.sumOf { it.unitPriceCents * it.quantity }
+        val subtotal = subtotal(items)
         val discount = discountFor(coupon, subtotal)
         val discounted = subtotal - discount
         val tax = (discounted * TAX_RATE_PERCENT + 50) / 100

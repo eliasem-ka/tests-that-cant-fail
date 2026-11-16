@@ -4,7 +4,7 @@ import com.eliaseguizabal.checkout.domain.CartItem
 import com.eliaseguizabal.checkout.domain.Coupon
 import com.eliaseguizabal.checkout.domain.Quote
 
-enum class CouponError { NOT_FOUND }
+enum class CouponError { NOT_FOUND, BELOW_MINIMUM, NETWORK }
 
 data class CheckoutState(
     val items: List<CartItem> = emptyList(),

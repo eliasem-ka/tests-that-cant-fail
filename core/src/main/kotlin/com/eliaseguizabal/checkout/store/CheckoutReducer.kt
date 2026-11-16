@@ -10,8 +10,9 @@ class CheckoutReducer(private val calculator: PriceCalculator) {
         CheckoutAction.CouponValidationStarted -> state.copy(isValidatingCoupon = true, couponError = null)
         is CheckoutAction.CouponApplied ->
             state.copy(appliedCoupon = action.coupon, isValidatingCoupon = false).requoted()
+        // A rejected code leaves the previously applied coupon (and its discount) in place.
         is CheckoutAction.CouponRejected ->
-            state.copy(appliedCoupon = null, couponError = action.error, isValidatingCoupon = false).requoted()
+            state.copy(couponError = action.error, isValidatingCoupon = false)
         CheckoutAction.CartSaved -> state
     }
 

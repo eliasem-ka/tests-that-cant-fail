@@ -115,10 +115,9 @@ private fun CouponField(
                 else Text("Apply")
             }
         }
-        when {
-            error != null -> Text(error.message(), color = MaterialTheme.colorScheme.error)
-            appliedCode != null -> Text("$appliedCode applied", color = MaterialTheme.colorScheme.primary)
-        }
+        // A rejected code keeps the previous coupon, so show both the error and what is still applied.
+        if (error != null) Text(error.message(), color = MaterialTheme.colorScheme.error)
+        if (appliedCode != null) Text("$appliedCode applied", color = MaterialTheme.colorScheme.primary)
     }
 }
 
@@ -138,6 +137,8 @@ private fun PointsField(onUse: (Long) -> Unit) {
     }
 }
 
-private fun CouponError.message(): String = when (this) {
+internal fun CouponError.message(): String = when (this) {
     CouponError.NOT_FOUND -> "That code doesn't exist."
+    CouponError.BELOW_MINIMUM -> "Your subtotal is below this code's minimum."
+    CouponError.NETWORK -> "Couldn't check that code. Check your connection and try again."
 }
