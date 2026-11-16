@@ -64,3 +64,15 @@ repository until the experiment was over; it is published in [`oracle/`](oracle/
 
 If an article pattern does not show up naturally in v1, it may be illustrated with a clearly
 labelled example under `reconstructed/`. Those examples are never counted in any number.
+
+## Amendment: what the isolated copies leave out
+
+Recorded during the v1 run, before any of its output was read. Besides `mutations/`, `scripts/`,
+`experiment/` and `docs/`, each isolated copy also drops:
+
+- the PIT plugin and its configuration (`core/build.gradle.kts`, the root build and the version
+  catalog), because it tells the agent the project is measured with mutation testing;
+- the lines of `.gitignore` that mention private planning folders and the oracle;
+- the git history: the copy is a single fresh commit, so the removed files can't be found in it.
+
+Nothing else differs from the tag. Only files under `*/src/test/` are copied back.
