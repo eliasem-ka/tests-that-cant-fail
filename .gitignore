@@ -1,4 +1,4 @@
-# Private planning — never public
+# Local tooling
 docs/superpowers/
 .claude/
 .superpowers/
@@ -13,6 +13,3 @@ build/
 .DS_Store
 captures/
 
-# Author's oracle suite (published after the experiment)
-**/src/test/**/oracle/
-experiment/oracle/

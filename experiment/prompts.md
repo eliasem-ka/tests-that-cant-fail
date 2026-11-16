@@ -9,6 +9,8 @@ claude -p "<prompt>" --model claude-opus-5-5 \
   --dangerously-skip-permissions --output-format json
 ```
 
+Local filesystem paths inside the reports are replaced with `<agent scratchpad>`; nothing else is edited.
+
 `--setting-sources project,local` and `--disable-slash-commands` keep the author's own plugins,
 hooks and skills out of the session. A smoke test of the same command answered
 "No skills or plugins are loaded in this session."
