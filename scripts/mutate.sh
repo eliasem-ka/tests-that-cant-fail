@@ -13,13 +13,15 @@
 #   COMPILE ERROR  the build broke           -> not evidence either way
 #   PATCH FAILED   the patch no longer applies to the code
 #
-# Override the test command with TEST_CMD. Works with macOS's stock bash 3.2.
+# Override the test command with TEST_CMD and the catalog folder with MUTATIONS_DIR
+# (default: mutations). Works with macOS's stock bash 3.2.
 
 set -u
 cd "$(dirname "$0")/.." || exit 1
 
 TEST_CMD=${TEST_CMD:-"./gradlew :core:test :app:testDebugUnitTest --continue --console=plain"}
-CATALOG=mutations/catalog.tsv
+MUTATIONS_DIR=${MUTATIONS_DIR:-mutations}
+CATALOG=$MUTATIONS_DIR/catalog.tsv
 LOG_DIR=build/mutate
 APPLIED=""
 
@@ -34,7 +36,7 @@ trap restore EXIT
 trap 'restore; echo; echo "Interrupted - production code restored."; exit 130' INT TERM
 
 patch_for() {
-  for f in mutations/"$1"-*.patch; do
+  for f in "$MUTATIONS_DIR"/"$1"-*.patch; do
     [ -e "$f" ] && echo "$f"
     return
   done
