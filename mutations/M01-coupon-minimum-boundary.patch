@@ -1,0 +1,13 @@
+diff --git a/core/src/main/kotlin/com/eliaseguizabal/checkout/domain/PriceCalculator.kt b/core/src/main/kotlin/com/eliaseguizabal/checkout/domain/PriceCalculator.kt
+index d1c4366..5b80892 100644
+--- a/core/src/main/kotlin/com/eliaseguizabal/checkout/domain/PriceCalculator.kt
++++ b/core/src/main/kotlin/com/eliaseguizabal/checkout/domain/PriceCalculator.kt
+@@ -7,7 +7,7 @@ import com.eliaseguizabal.checkout.domain.PricingRules.TAX_RATE_PERCENT
+ class PriceCalculator {
+ 
+     fun isEligible(coupon: Coupon, subtotalCents: Long): Boolean =
+-        subtotalCents >= coupon.minSubtotalCents
++        subtotalCents > coupon.minSubtotalCents
+ 
+     fun quote(items: List<CartItem>, coupon: Coupon?, loyaltyPointsCents: Long): Quote {
+         if (items.isEmpty()) return Quote.EMPTY

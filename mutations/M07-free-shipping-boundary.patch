@@ -1,0 +1,13 @@
+diff --git a/core/src/main/kotlin/com/eliaseguizabal/checkout/domain/PriceCalculator.kt b/core/src/main/kotlin/com/eliaseguizabal/checkout/domain/PriceCalculator.kt
+index d1c4366..a60e19f 100644
+--- a/core/src/main/kotlin/com/eliaseguizabal/checkout/domain/PriceCalculator.kt
++++ b/core/src/main/kotlin/com/eliaseguizabal/checkout/domain/PriceCalculator.kt
+@@ -16,7 +16,7 @@ class PriceCalculator {
+         val discount = discountFor(coupon, subtotal)
+         val discounted = subtotal - discount
+         val tax = (discounted * TAX_RATE_PERCENT + 50) / 100
+-        val shipping = if (discounted > FREE_SHIPPING_ABOVE_CENTS) 0L else SHIPPING_FEE_CENTS
++        val shipping = if (discounted >= FREE_SHIPPING_ABOVE_CENTS) 0L else SHIPPING_FEE_CENTS
+         val beforePoints = discounted + tax + shipping
+         val points = minOf(loyaltyPointsCents.coerceAtLeast(0), beforePoints)
+ 

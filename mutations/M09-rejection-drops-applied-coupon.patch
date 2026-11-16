@@ -1,0 +1,13 @@
+diff --git a/core/src/main/kotlin/com/eliaseguizabal/checkout/store/CheckoutReducer.kt b/core/src/main/kotlin/com/eliaseguizabal/checkout/store/CheckoutReducer.kt
+index e8b868d..20fb53c 100644
+--- a/core/src/main/kotlin/com/eliaseguizabal/checkout/store/CheckoutReducer.kt
++++ b/core/src/main/kotlin/com/eliaseguizabal/checkout/store/CheckoutReducer.kt
+@@ -11,7 +11,7 @@ class CheckoutReducer(private val calculator: PriceCalculator) {
+         is CheckoutAction.CouponApplied ->
+             state.copy(appliedCoupon = action.coupon, isValidatingCoupon = false).requoted()
+         is CheckoutAction.CouponRejected ->
+-            state.copy(couponError = action.error, isValidatingCoupon = false)
++            state.copy(couponError = action.error, isValidatingCoupon = false, appliedCoupon = null).requoted()
+         CheckoutAction.CartSaved -> state
+     }
+ 

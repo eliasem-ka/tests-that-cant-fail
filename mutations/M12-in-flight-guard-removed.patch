@@ -1,0 +1,12 @@
+diff --git a/core/src/main/kotlin/com/eliaseguizabal/checkout/store/CouponMiddleware.kt b/core/src/main/kotlin/com/eliaseguizabal/checkout/store/CouponMiddleware.kt
+index 2610e86..5e2aa51 100644
+--- a/core/src/main/kotlin/com/eliaseguizabal/checkout/store/CouponMiddleware.kt
++++ b/core/src/main/kotlin/com/eliaseguizabal/checkout/store/CouponMiddleware.kt
+@@ -15,7 +15,6 @@ class CouponMiddleware(
+         dispatch: (CheckoutAction) -> Unit,
+     ) {
+         if (intent !is CheckoutIntent.ApplyCoupon) return
+-        if (state().isValidatingCoupon) return
+ 
+         dispatch(CheckoutAction.CouponValidationStarted)
+         val action = when (val result = repository.find(intent.code)) {

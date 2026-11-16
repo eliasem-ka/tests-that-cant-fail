@@ -1,0 +1,13 @@
+diff --git a/app/src/main/kotlin/com/eliaseguizabal/checkout/app/CheckoutScreen.kt b/app/src/main/kotlin/com/eliaseguizabal/checkout/app/CheckoutScreen.kt
+index cdbb7b5..738d9ea 100644
+--- a/app/src/main/kotlin/com/eliaseguizabal/checkout/app/CheckoutScreen.kt
++++ b/app/src/main/kotlin/com/eliaseguizabal/checkout/app/CheckoutScreen.kt
+@@ -64,7 +64,7 @@ fun CheckoutScreen(
+             }
+             item { PointsField(onUse = { onIntent(CheckoutIntent.UsePoints(it)) }) }
+             item {
+-                QuoteSummary(quote = state.quote, showDiscountRow = state.quote.discountCents > 0)
++                QuoteSummary(quote = state.quote)
+             }
+             item {
+                 Button(

@@ -1,0 +1,13 @@
+diff --git a/core/src/main/kotlin/com/eliaseguizabal/checkout/store/CouponMiddleware.kt b/core/src/main/kotlin/com/eliaseguizabal/checkout/store/CouponMiddleware.kt
+index 2610e86..5714bdc 100644
+--- a/core/src/main/kotlin/com/eliaseguizabal/checkout/store/CouponMiddleware.kt
++++ b/core/src/main/kotlin/com/eliaseguizabal/checkout/store/CouponMiddleware.kt
+@@ -26,7 +26,7 @@ class CouponMiddleware(
+                     CheckoutAction.CouponRejected(CouponError.BELOW_MINIMUM)
+                 }
+             CouponResult.NotFound -> CheckoutAction.CouponRejected(CouponError.NOT_FOUND)
+-            CouponResult.NetworkError -> CheckoutAction.CouponRejected(CouponError.NETWORK)
++            CouponResult.NetworkError -> CheckoutAction.CouponRejected(CouponError.NOT_FOUND)
+         }
+         dispatch(action)
+     }
