@@ -131,6 +131,42 @@ class CouponValidationTest {
         assertEquals(justAbove, store.state.value.appliedCoupon)
     }
 
+    @Test
+    fun `minimum is checked against the cart as it is when the lookup returns`() = runTest {
+        val gate = CompletableDeferred<Unit>()
+        val repository = FakeRepository(
+            results = mapOf(justAbove.code to CouponResult.Found(justAbove)),
+            gates = mapOf(justAbove.code to gate),
+        )
+        val store = store(backgroundScope, repository)
+
+        apply(store, justAbove.code) // lookup in flight, cart is 30.00
+        store.dispatch(CheckoutIntent.AddItem(CartItem(sku = "C", unitPriceCents = 1, quantity = 1)))
+        runCurrent() // cart is now 30.01
+        gate.complete(Unit)
+        runCurrent()
+
+        assertEquals(justAbove, store.state.value.appliedCoupon)
+        assertNull(store.state.value.couponError)
+        assertEquals(500, store.state.value.quote.discountCents)
+    }
+
+    @Test
+    fun `other intents never start a coupon lookup`() = runTest {
+        val repository = defaultRepository()
+        val store = store(backgroundScope, repository)
+
+        store.dispatch(CheckoutIntent.AddItem(CartItem(sku = "C", unitPriceCents = 1, quantity = 1)))
+        store.dispatch(CheckoutIntent.UsePoints(10))
+        store.dispatch(CheckoutIntent.SaveCart)
+        runCurrent()
+
+        assertEquals(0, repository.calls.get())
+        assertNull(store.state.value.appliedCoupon)
+        assertNull(store.state.value.couponError)
+        assertFalse(store.state.value.isValidatingCoupon)
+    }
+
     // --- 2. Network vs. not found --------------------------------------------
 
     @Test
