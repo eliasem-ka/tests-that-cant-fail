@@ -1,0 +1,13 @@
+diff --git a/core/src/main/kotlin/com/eliaseguizabal/checkout/domain/PriceCalculator.kt b/core/src/main/kotlin/com/eliaseguizabal/checkout/domain/PriceCalculator.kt
+index d34d4f5..fd4c7ba 100644
+--- a/core/src/main/kotlin/com/eliaseguizabal/checkout/domain/PriceCalculator.kt
++++ b/core/src/main/kotlin/com/eliaseguizabal/checkout/domain/PriceCalculator.kt
+@@ -35,7 +35,7 @@ class PriceCalculator {
+     private fun discountFor(coupon: Coupon?, subtotal: Long): Long {
+         if (coupon == null || !isEligible(coupon, subtotal)) return 0
+         return when (coupon) {
+-            is PercentOff -> minOf(subtotal * coupon.percent / 100, coupon.maxDiscountCents)
++            is PercentOff -> subtotal * coupon.percent / 100
+             is AmountOff -> minOf(coupon.amountCents, subtotal)
+         }
+     }

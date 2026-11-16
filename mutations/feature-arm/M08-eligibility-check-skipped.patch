@@ -1,0 +1,13 @@
+diff --git a/core/src/main/kotlin/com/eliaseguizabal/checkout/store/CouponMiddleware.kt b/core/src/main/kotlin/com/eliaseguizabal/checkout/store/CouponMiddleware.kt
+index b2923c9..d6c6dbd 100644
+--- a/core/src/main/kotlin/com/eliaseguizabal/checkout/store/CouponMiddleware.kt
++++ b/core/src/main/kotlin/com/eliaseguizabal/checkout/store/CouponMiddleware.kt
+@@ -25,7 +25,7 @@ class CouponMiddleware(
+             dispatch(CheckoutAction.CouponValidationStarted)
+             val action = when (val result = repository.find(intent.code)) {
+                 is CouponResult.Found ->
+-                    if (calculator.isEligible(result.coupon, calculator.subtotal(state().items))) {
++                    if (true) {
+                         CheckoutAction.CouponApplied(result.coupon)
+                     } else {
+                         CheckoutAction.CouponRejected(CouponError.BELOW_MINIMUM)

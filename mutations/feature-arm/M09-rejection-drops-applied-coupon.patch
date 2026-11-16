@@ -1,0 +1,13 @@
+diff --git a/core/src/main/kotlin/com/eliaseguizabal/checkout/store/CheckoutReducer.kt b/core/src/main/kotlin/com/eliaseguizabal/checkout/store/CheckoutReducer.kt
+index af3bfea..358c0b5 100644
+--- a/core/src/main/kotlin/com/eliaseguizabal/checkout/store/CheckoutReducer.kt
++++ b/core/src/main/kotlin/com/eliaseguizabal/checkout/store/CheckoutReducer.kt
+@@ -12,7 +12,7 @@ class CheckoutReducer(private val calculator: PriceCalculator) {
+             state.copy(appliedCoupon = action.coupon, isValidatingCoupon = false).requoted()
+         // A rejected code leaves the previously applied coupon (and its discount) in place.
+         is CheckoutAction.CouponRejected ->
+-            state.copy(couponError = action.error, isValidatingCoupon = false)
++            state.copy(couponError = action.error, isValidatingCoupon = false, appliedCoupon = null).requoted()
+         CheckoutAction.CartSaved -> state
+     }
+ 

@@ -1,0 +1,12 @@
+diff --git a/core/src/main/kotlin/com/eliaseguizabal/checkout/store/CartPersistenceMiddleware.kt b/core/src/main/kotlin/com/eliaseguizabal/checkout/store/CartPersistenceMiddleware.kt
+index efb2cfc..3621b42 100644
+--- a/core/src/main/kotlin/com/eliaseguizabal/checkout/store/CartPersistenceMiddleware.kt
++++ b/core/src/main/kotlin/com/eliaseguizabal/checkout/store/CartPersistenceMiddleware.kt
+@@ -12,7 +12,6 @@ class CartPersistenceMiddleware(private val cartStore: CartStore) : Middleware {
+     ) {
+         if (intent != CheckoutIntent.SaveCart) return
+         val current = state()
+-        cartStore.clearCachedQuote()
+         cartStore.save(CartSnapshot(current.items, current.appliedCoupon?.code))
+         dispatch(CheckoutAction.CartSaved)
+     }
