@@ -1,0 +1,18 @@
+# Private planning — never public
+docs/superpowers/
+.claude/
+.superpowers/
+
+# Local / build
+local.properties
+build/
+.gradle/
+.kotlin/
+.idea/
+*.iml
+.DS_Store
+captures/
+
+# Author's oracle suite (published after the experiment)
+**/src/test/**/oracle/
+experiment/oracle/
