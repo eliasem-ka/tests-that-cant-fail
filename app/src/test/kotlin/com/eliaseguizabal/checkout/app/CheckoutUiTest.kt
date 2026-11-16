@@ -8,6 +8,11 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.hasScrollAction
+import androidx.compose.ui.test.hasClickAction
+import androidx.compose.ui.test.hasAnyDescendant
+import androidx.compose.ui.test.hasProgressBarRangeInfo
+import androidx.compose.ui.semantics.ProgressBarRangeInfo
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.performScrollToNode
 import androidx.compose.ui.test.performTextInput
@@ -114,5 +119,50 @@ class CheckoutUiTest {
     @Test fun appliedCouponIsShown() {
         rule.setContent { CheckoutScreen(CheckoutState(appliedCoupon = AmountOff("FIVEOFF", 0, 500)), {}) }
         rule.onNodeWithText("FIVEOFF applied").assertIsDisplayed()
+    }
+
+    @Test fun screenShowsDiscountRowOnlyWhenThereIsADiscount() {
+        val withDiscount = CheckoutState(items = listOf(CartItem("a", 1_000, 1)), quote = Quote(1_000, 500, 65, 599, 0, 1_164))
+        rule.setContent { CheckoutScreen(withDiscount, {}) }
+        rule.onNodeWithTag("discountRow").assertIsDisplayed()
+        rule.onNodeWithText("-$5.00").assertIsDisplayed()
+    }
+
+    @Test fun screenHidesDiscountRowWithoutDiscount() {
+        val noDiscount = CheckoutState(items = listOf(CartItem("a", 1_000, 1)), quote = Quote(1_000, 0, 130, 599, 0, 1_729))
+        rule.setContent { CheckoutScreen(noDiscount, {}) }
+        rule.onNodeWithTag("discountRow").assertDoesNotExist()
+    }
+
+    @Test fun applyIsDisabledAndShowsSpinnerWhileValidating() {
+        val intents = mutableListOf<CheckoutIntent>()
+        val state = mutableStateOf(CheckoutState())
+        rule.setContent { CheckoutScreen(state.value, intents::add) }
+        rule.onNodeWithText("Coupon code").performTextInput("SAVE10")
+        rule.onNodeWithText("Apply").assertIsEnabled()
+        state.value = CheckoutState(isValidatingCoupon = true)
+        rule.waitForIdle()
+        rule.onNodeWithText("Apply").assertDoesNotExist()
+        val applyButton = hasClickAction() and hasAnyDescendant(hasProgressBarRangeInfo(ProgressBarRangeInfo.Indeterminate))
+        rule.onNode(applyButton).assertIsNotEnabled().performClick()
+        assertEquals(emptyList<CheckoutIntent>(), intents)
+    }
+
+    @Test fun noSpinnerWhenNotValidating() {
+        rule.setContent { CheckoutScreen(CheckoutState(), {}) }
+        rule.onNode(hasProgressBarRangeInfo(ProgressBarRangeInfo.Indeterminate)).assertDoesNotExist()
+    }
+
+    @Test fun errorTakesPrecedenceOverAppliedCouponMessage() {
+        val state = CheckoutState(appliedCoupon = AmountOff("FIVEOFF", 0, 500), couponError = CouponError.NETWORK)
+        rule.setContent { CheckoutScreen(state, {}) }
+        rule.onNodeWithText("Couldn't reach the server. Try again.").assertIsDisplayed()
+        rule.onNodeWithText("FIVEOFF applied").assertDoesNotExist()
+    }
+
+    @Test fun noCouponMessageByDefault() {
+        rule.setContent { CheckoutScreen(CheckoutState(), {}) }
+        rule.onNodeWithText("FIVEOFF applied").assertDoesNotExist()
+        rule.onNodeWithText("That code doesn't exist.").assertDoesNotExist()
     }
 }

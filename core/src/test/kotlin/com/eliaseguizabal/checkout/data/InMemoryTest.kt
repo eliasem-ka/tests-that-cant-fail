@@ -21,6 +21,10 @@ class InMemoryTest {
         assertEquals(AmountOff("FIVEOFF", 0, 500), (repo.find("FIVEOFF") as CouponResult.Found).coupon)
     }
 
+    @Test fun `finds BIG20 coupon`() = runTest {
+        assertEquals(PercentOff("BIG20", 10_000, 20, 2_500), (repo.find("big20") as CouponResult.Found).coupon)
+    }
+
     @Test fun `unknown code is NotFound`() = runTest {
         assertEquals(CouponResult.NotFound, repo.find("nope"))
     }
