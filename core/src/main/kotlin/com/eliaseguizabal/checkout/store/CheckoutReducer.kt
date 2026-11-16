@@ -11,7 +11,7 @@ class CheckoutReducer(private val calculator: PriceCalculator) {
         is CheckoutAction.CouponApplied ->
             state.copy(appliedCoupon = action.coupon, isValidatingCoupon = false).requoted()
         is CheckoutAction.CouponRejected ->
-            state.copy(couponError = action.error, isValidatingCoupon = false)
+            state.copy(appliedCoupon = null, couponError = action.error, isValidatingCoupon = false).requoted()
         CheckoutAction.CartSaved -> state
     }
 

@@ -15,18 +15,11 @@ class CouponMiddleware(
         dispatch: (CheckoutAction) -> Unit,
     ) {
         if (intent !is CheckoutIntent.ApplyCoupon) return
-        if (state().isValidatingCoupon) return
 
         dispatch(CheckoutAction.CouponValidationStarted)
         val action = when (val result = repository.find(intent.code)) {
-            is CouponResult.Found ->
-                if (calculator.isEligible(result.coupon, state().quote.subtotalCents)) {
-                    CheckoutAction.CouponApplied(result.coupon)
-                } else {
-                    CheckoutAction.CouponRejected(CouponError.BELOW_MINIMUM)
-                }
-            CouponResult.NotFound -> CheckoutAction.CouponRejected(CouponError.NOT_FOUND)
-            CouponResult.NetworkError -> CheckoutAction.CouponRejected(CouponError.NETWORK)
+            is CouponResult.Found -> CheckoutAction.CouponApplied(result.coupon)
+            CouponResult.NotFound, CouponResult.NetworkError -> CheckoutAction.CouponRejected(CouponError.NOT_FOUND)
         }
         dispatch(action)
     }

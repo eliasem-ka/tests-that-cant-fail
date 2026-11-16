@@ -140,6 +140,4 @@ private fun PointsField(onUse: (Long) -> Unit) {
 
 private fun CouponError.message(): String = when (this) {
     CouponError.NOT_FOUND -> "That code doesn't exist."
-    CouponError.BELOW_MINIMUM -> "Your cart is below this coupon's minimum."
-    CouponError.NETWORK -> "Couldn't reach the server. Try again."
 }
