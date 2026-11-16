@@ -9,7 +9,7 @@ Each arm was measured on its tag with the same commands as v1 ([protocol.md](pro
 | Arm A — Haiku, write-tests prompt | 92 | 14/15 | 93/117 (79%) | 278/287 (96.9%) |
 | Arm B — Opus, ticket + tests | 20 | 6/15 | 55/119 (46%) | 214/289 (74.0%) |
 
-Arm B's agent wrote its own production code, so its catalog is in [`mutations/feature-arm/`](../mutations/feature-arm/README.md) on branch `arm/feature`. Within the ticket's scope (rules 1, 6 and 7: M01, M08–M12) it killed 6 of 6. The nine survivors are rules the ticket never touched, which nobody asked it to test.
+Arm B's agent wrote its own production code, so its catalog is in `mutations/feature-arm/` on branch `arm/feature`. Within the ticket's scope (rules 1, 6 and 7: M01, M08–M12) it killed 6 of 6. The nine survivors are rules the ticket never touched, which nobody asked it to test.
 
 ## sonnet
 
