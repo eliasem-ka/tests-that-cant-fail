@@ -76,3 +76,53 @@ Recorded during the v1 run, before any of its output was read. Besides `mutation
 - the git history: the copy is a single fresh commit, so the removed files can't be found in it.
 
 Nothing else differs from the tag. Only files under `*/src/test/` are copied back.
+
+## Amendment: two more arms (decided after v1, before running them)
+
+v1 caught all 15 mutations. That answers the question for one setup: the strongest model, a small
+clean codebase, and a task that is only about tests. The real-world cases that motivated this repo
+looked different, so two arms are added. Everything below was written and committed before either
+arm ran.
+
+### Arm A — model
+
+The v1 prompt and isolation, unchanged, with two other models: `claude-sonnet-5-5` and
+`claude-haiku-5-5`. One run each, same output-handling rules. Each lives on its own branch
+(`arm/sonnet`, `arm/haiku`, cut from `v0-no-tests`) and is tagged `v1-sonnet` / `v1-haiku`.
+Measured with the full catalog.
+
+### Arm B — tests as part of a feature
+
+In real projects most tests are written alongside a change, not in a dedicated "write tests" task.
+This arm starts from `v0-no-tests` with the coupon-failure behaviour taken out
+(branch `arm/feature`, tag `feature-base`):
+
+- `CouponError` has only `NOT_FOUND`;
+- `CouponMiddleware` has no in-flight guard, no minimum check, and reports every failure as
+  `NOT_FOUND`;
+- the reducer drops the applied coupon (and re-quotes) when a code is rejected;
+- the screen shows one message for every error.
+
+The agent (`claude-opus-5-5`, same isolation) gets this prompt, verbatim, plus the environment
+sentence:
+
+> Implement this ticket in the checkout feature and add tests.
+>
+> Coupon validation improvements:
+> 1. If the code is valid but the cart subtotal is below the coupon's minimum, reject it with a new `CouponError.BELOW_MINIMUM`.
+> 2. If the coupon lookup fails with a network error, reject it with a new `CouponError.NETWORK` instead of `NOT_FOUND`.
+> 3. When a code is rejected, keep the coupon that was already applied, and its discount.
+> 4. Ignore a second Apply while a code is still being validated.
+>
+> Show a message for each error on the checkout screen.
+
+Its production code is its own, so the catalogued patches for the files it touches may no longer
+apply. For those, the mutation is **ported**: same rule, same kind of minimal change, applied to the
+line that enforces the rule in the agent's implementation. Ported patches live in
+`mutations/feature-arm/` with a note pointing at the original. Patches for files it didn't touch are
+used as they are. Tagged `v1-feature`.
+
+### Where v2 runs
+
+v2 (the "prove your tests" prompt) runs on the arm with the most surviving mutations, starting from
+that arm's suite. If every arm kills all of its mutations, v2 is not run, and the article says so.
