@@ -10,7 +10,7 @@ Measured on tag `v1-ai-suite` with the commands in [protocol.md](protocol.md).
 | Kover line coverage (both modules) | 278/287 (96.9%) |
 | Kover branch coverage | 124/135 (91.9%) |
 | Catalogued mutations killed | **15 / 15** |
-| PIT (`:core`) | 85/117 killed (72%) |
+| PIT (`:core`) | 90/117 detected (77%): 85 killed + 5 timed out, which PIT counts as detected |
 
 ## Catalogued mutations
 
@@ -49,4 +49,4 @@ Killed 15 of 15 mutations.
 
 Status counts: KILLED 85, NO_COVERAGE 6, SURVIVED 21, TIMED_OUT 5.
 
-For comparison, the author's oracle suite scored 80/117 (68%) on PIT and also killed 15/15.
+For comparison, the author's oracle suite scored 80/117 (68%) on PIT, counted the same way, and also killed 15/15.
