@@ -1,4 +1,4 @@
-# I tried to catch AI agents writing tests that can't fail. The bug they missed has no line of code.
+# I tried to catch AI agents writing tests that can't fail. The bug that got through lives in code that isn't there.
 
 *Six AI-written test suites, 15 planted bugs, and why line coverage couldn't tell the suites apart.*
 
@@ -19,7 +19,7 @@ It wasn't the first time. On a large production app I work on, a release audit f
 line coverage that stayed green with the bug fix reverted, and fixes that had shipped with no test
 at all. And when I asked a code-review agent for a bug hunt, it marked ten findings as confirmed or
 plausible. Fixing them one by one, red test first, one "confirmed" race never reproduced and another
-finding cited a guard function that doesn't exist in that module.
+finding cited a guard function that doesn't exist in that module. Six of the others were real.
 
 So I had a hypothesis, and I wanted numbers for it: **AI agents write tests that pass whether the
 code is right or not.** I built a small Android project to measure it.
@@ -65,8 +65,9 @@ in any number below.
 
 Each test suite was written by a fresh, headless Claude Code session (`claude -p`) with none of my
 plugins, hooks or skills, working in a throwaway copy of the repo that had no mutation catalog, no
-PIT configuration and no git history to dig through. One run per suite, no re-rolls. The protocol,
-including the arms I added halfway, was committed before each run.
+PIT configuration and no git history to dig through. One run per suite, no re-rolls. The protocol was
+committed before each run, including the two arms I added halfway; one follow-up run, marked below,
+was decided after seeing results.
 
 ## Result one: I was wrong
 
@@ -98,9 +99,10 @@ Two things stand out before looking at any test.
 through, the other doesn't.
 
 **PIT didn't separate them much either.** All three "write tests" suites land between 76% and 79%,
-and my oracle, which caught all 15 bugs, scored lower: 68%. Most of PIT's survivors are in code nobody
-wrote by hand: the state machines Kotlin generates for `suspend` functions, and the in-memory
-fakes. PIT is a good second opinion, but on Kotlin coroutine code its score is mostly noise.
+and my oracle, which caught all 15 bugs, scored lower: 68%. Most of PIT's survivors sit in the state
+machines Kotlin generates for `suspend` functions and in in-memory fakes the tests never touch. PIT
+clearly separated the narrow ticket suite (46%) from the rest, but among suites that cover most of
+the code it barely moved.
 
 The ticket arm's 9 survivors aren't a quality problem: they're rules the ticket never touched, and
 nobody asked for tests there. Inside its scope it caught every mutation.
@@ -134,15 +136,19 @@ QuoteSummary(quote = state.quote, showDiscountRow = state.quote.discountCents > 
 ```
 
 `showDiscountRow` defaults to `false`. Delete the argument and everything still compiles; the row
-silently never appears. Sonnet's test renders `QuoteSummary` on its own and passes the flag by hand:
+silently never appears. Sonnet's suite does test the row, but by rendering `QuoteSummary` on its own
+and passing the flag by hand:
 
 ```kotlin
+// arm/sonnet — CheckoutUiTest.kt
 rule.setContent { QuoteSummary(quote, showDiscountRow = true) }
+// …
 rule.onNodeWithTag("discountRow").assertIsDisplayed()
 ```
 
-The composable that *decides* the flag is never on screen. The test needs to render
-`CheckoutScreen` with a state that has a discount.
+It renders `CheckoutScreen` in ten other tests, so the line that decides the flag runs and counts as
+covered. None of those ten uses a quote with a discount and then looks for the row. The line is
+executed, covered and unchecked.
 
 Neither is a missing test, and neither shows up as a coverage gap. Both are tests aimed at the wrong
 thing.
@@ -158,15 +164,26 @@ suite and this instruction (abridged; the full prompt is in the repo):
 > until one fails; (5) restore the production line exactly. Tests must assert observable outcomes, not
 > only that a mock was called.
 
-On the ticket arm, Opus took the suite from 6 to **15 of 15**. It ran 98 mutations of its own and
-even flagged a real gap I hadn't noticed: the ViewModel's factory builds the cart store internally,
-so nothing can test that tapping Save actually saves.
+The protocol put this run on the ticket arm, which had the most survivors. Opus took that suite from
+6 to 15 of 15, but that mostly measures writing tests for rules the ticket never touched (its first
+suite, with the plain prompt, had already caught all 15). It did run 98 mutations of its own and
+flagged a real gap I hadn't noticed: the ViewModel's factory builds the cart store internally, so
+nothing can test that tapping Save actually saves.
 
-On Sonnet's suite, 104 self-run mutations later, the discount-row gap was fixed: it broke the
-screen's argument, saw nothing fail and added a screen-level test. Its report said every rule was
-now caught except one equivalent mutant.
+The more telling run is one I added after seeing the arm results: the same prompt on Sonnet's suite.
+104 self-run mutations later, the discount-row gap was fixed. It broke the screen's argument, saw
+nothing fail, and added a test that renders the screen with a discount:
 
-**The rejection bug still survived.** And I think the agent was right, from where it stood.
+```kotlin
+// v2-sonnet — CheckoutUiTest.kt
+val withDiscount = CheckoutState(items = listOf(CartItem("a", 1_000, 1)), quote = Quote(1_000, 500, 65, 599, 0, 1_164))
+rule.setContent { CheckoutScreen(withDiscount, {}) }
+rule.onNodeWithTag("discountRow").assertIsDisplayed()
+```
+
+Its report said every rule was now caught except one equivalent mutant.
+
+**The rejection bug still survived.**
 
 Look at the reducer branch that enforces "a rejected code keeps the coupon already applied":
 
@@ -175,11 +192,16 @@ is CheckoutAction.CouponRejected ->
     state.copy(couponError = action.error, isValidatingCoupon = false)
 ```
 
-The rule is enforced by what that line **doesn't** do: it never touches `appliedCoupon`. There is no
-line to break. An agent that starts from "find the line that makes the rule true" finds the error and
-the flag, breaks both, sees them caught, and moves on. The Opus agent on the ticket arm caught this
-exact rule because its ticket said it out loud: *"When a code is rejected, keep the coupon that was
-already applied."*
+The rule is enforced by what that line **doesn't** do: it never touches `appliedCoupon`. Breaking
+it means *adding* code (clear the coupon, re-price), while every example in my prompt (flip, drop,
+swap, return the default) changes or removes code that's already there. Sonnet broke what it could
+see, the error and the flag, watched both get caught, and moved on.
+
+It isn't invisible to every agent. Opus caught this bug in its first suite with the plain prompt, and
+the Opus agent on the ticket arm broke the rule on purpose by adding exactly that code, because its
+ticket said it out loud: *"When a code is rejected, keep the coupon that was already applied."* My
+read, from one run each, is that rules enforced by omission are the easiest to miss, for an agent
+following a line-by-line recipe and for a person reviewing the diff.
 
 And coverage didn't move: Sonnet's suite went from 13 to 14 caught bugs at exactly the same 88.9%.
 
@@ -197,20 +219,23 @@ What I do now:
    restore with `git checkout`. Five minutes per rule, and it's the only check that measures what a
    test is for.
 3. **Write the rules down, especially the "must not change" ones.** "Keeps the previous coupon",
-   "doesn't reset the form", "doesn't re-fetch": rules enforced by omission have no line to mutate.
-   Put them in the ticket or the prompt, and test them from a state where the thing exists.
+   "doesn't reset the form", "doesn't re-fetch": rules enforced by omission have no line to flip, and
+   breaking them means adding code. Put them in the ticket or the prompt, and test them from a state
+   where the thing exists.
 4. **Test the composable that decides, not the one that renders.** Any parameter with a default
    value is a wire that can be cut without a compile error.
 5. **Read coverage as "what never ran", nothing more.** A line at 0% is unprotected. A line at 100%
    tells you nothing.
-6. **Put the mutation step in the prompt.** It costs a few minutes of agent time, and in this
-   experiment it took one suite from 6 to 15 caught bugs.
+6. **Put the mutation step in the prompt, and name the omission rules.** It costs a few minutes of
+   agent time. In this experiment it closed the Compose wiring gap; it didn't find the rule that
+   only a ticket stated.
 
 ## Caveats
 
 This is one small, clean codebase with nine rules, one run per suite, and only Claude models. The
-ticket was written by me, and the mutations are mine, though they were frozen before any agent
-ran and proven against my oracle. A large legacy codebase with rules nobody wrote down would almost
+ticket was written by me, and the mutations are mine: the catalog was frozen before the first agent
+ran and proven against my oracle (two were later ported to the ticket arm's own code, same change on
+its version of the line). A large legacy codebase with rules nobody wrote down would almost
 certainly look worse, and that's the next experiment worth doing.
 
 ## Run it yourself

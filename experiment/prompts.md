@@ -303,6 +303,7 @@ The mutation harness is `<agent scratchpad>`. Per-mutation results, including ev
 - **Started:** 2026-11-16T05:22Z (UTC)
 - **Duration:** 9.4 minutes, 18 turns
 - **Starts from:** the arm's v1 suite. **Tag:** `v2-sonnet`
+- **Note:** this run was added after the arm results; it is not in the pre-registered protocol. Line numbers in the report are the agent's own, and some don't match the files.
 
 - **Prompt** (verbatim, the same for both v2 runs):
 

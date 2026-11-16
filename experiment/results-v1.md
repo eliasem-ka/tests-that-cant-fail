@@ -36,7 +36,7 @@ Killed 15 of 15 mutations.
 
 ## PIT survivors by class
 
-| Class | Not killed |
+| Class | Not killed (includes the 5 timed out, which PIT counts as detected) |
 |---|---|
 | `CartPersistenceMiddleware` | 9 |
 | `CouponMiddleware` | 6 |

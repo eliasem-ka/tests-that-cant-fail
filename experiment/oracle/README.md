@@ -8,7 +8,8 @@ They were kept out of the repository until the experiment was over, and they nev
 the measurements: no agent saw them, and no number in `experiment/` includes them.
 
 They keep the paths they had in the project (`core/src/test/...`, `app/src/test/...`). To run them,
-copy them into those folders on any tag:
+copy them into those folders on any tag except the feature-arm ones (`feature-base`,
+`v1-feature*`, `v2-feature`), whose production code differs:
 
 ```bash
 cp -R experiment/oracle/core/src/test core/src/

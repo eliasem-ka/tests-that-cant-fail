@@ -1,7 +1,7 @@
 # Mutation catalog
 
 Each mutation breaks one business rule with one minimal change to the line that enforces it.
-They were written from the rules, before any test in this repo existed, and frozen before the AI suite was generated.
+They were written from the rules, before any agent-written test existed (the author's oracle, which validates them, came first), and frozen before the first AI suite was generated.
 
 | Id | Rule | What breaks | File |
 |---|---|---|---|

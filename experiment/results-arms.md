@@ -90,10 +90,11 @@ Killed 6 of 15 mutations.
 }
 ```
 
-**M15** (the checkout screen stops passing `showDiscountRow`) survived in Sonnet. Its test renders `QuoteSummary` directly and passes the flag by hand, so the screen that decides the flag is never exercised:
+**M15** (the checkout screen stops passing `showDiscountRow`) survived in Sonnet. Its row test renders `QuoteSummary` directly and passes the flag by hand. The suite renders `CheckoutScreen` in ten other tests, so the deciding line is covered, but none of them uses a quote with a discount and looks for the row:
 
 ```kotlin
 // arm/sonnet — app/src/test/kotlin/com/eliaseguizabal/checkout/app/CheckoutUiTest.kt
 rule.setContent { QuoteSummary(quote, showDiscountRow = true) }
+// …
 rule.onNodeWithTag("discountRow").assertIsDisplayed()
 ```

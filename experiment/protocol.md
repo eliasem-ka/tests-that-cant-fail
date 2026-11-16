@@ -126,3 +126,9 @@ used as they are. Tagged `v1-feature`.
 
 v2 (the "prove your tests" prompt) runs on the arm with the most surviving mutations, starting from
 that arm's suite. If every arm kills all of its mutations, v2 is not run, and the article says so.
+
+## Note added after the runs (2026-11-16)
+
+The tag `v2-agent-proves-tests` named at the top of this file was never created: v1 caught all 15
+mutations, so v2 moved to the arms. The v2 runs are tagged `v2-feature` (the pre-registered arm) and
+`v2-sonnet` (added after the arm results). The text above is left as it was committed.

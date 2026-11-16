@@ -9,6 +9,7 @@
 # For each mutation: apply the patch, run the tests, report the result, restore.
 #
 #   KILLED         at least one test failed  -> some test protects this rule
+#                  (any failing test counts; the log in build/mutate/ shows why)
 #   SURVIVED       every test stayed green   -> nothing protects this rule
 #   COMPILE ERROR  the build broke           -> not evidence either way
 #   PATCH FAILED   the patch no longer applies to the code
@@ -19,7 +20,8 @@
 set -u
 cd "$(dirname "$0")/.." || exit 1
 
-TEST_CMD=${TEST_CMD:-"./gradlew :core:test :app:testDebugUnitTest --continue --console=plain"}
+# --no-build-cache: a cached green run must never stand in for a real one.
+TEST_CMD=${TEST_CMD:-"./gradlew :core:test :app:testDebugUnitTest --continue --no-build-cache --console=plain"}
 MUTATIONS_DIR=${MUTATIONS_DIR:-mutations}
 CATALOG=$MUTATIONS_DIR/catalog.tsv
 LOG_DIR=build/mutate
@@ -32,8 +34,9 @@ restore() {
     APPLIED=""
   fi
 }
+exec 3>&2  # the terminal, even while a test run's output is redirected to a log
 trap restore EXIT
-trap 'restore; echo; echo "Interrupted - production code restored."; exit 130' INT TERM
+trap 'restore; printf "\nInterrupted - production code restored.\n" >&3; exit 130' INT TERM
 
 patch_for() {
   for f in "$MUTATIONS_DIR"/"$1"-*.patch; do
@@ -112,6 +115,7 @@ echo "| Mutation | Rule | What breaks | Result | Caught by |"
 echo "|---|---|---|---|---|"
 killed=0
 total=0
+skipped=0
 status=0
 for id in $IDS; do
   rule=$(awk -F'\t' -v id="$id" '$1 == id { print $2 }' "$CATALOG")
@@ -122,11 +126,13 @@ for id in $IDS; do
 
   if [ -z "$patch" ] || ! git apply --check "$patch" 2>/dev/null; then
     echo "| $id | $rule | $desc | PATCH FAILED | |"
+    skipped=$((skipped + 1))
     status=3
     continue
   fi
 
-  git apply "$patch" && APPLIED="$patch"
+  APPLIED="$patch"
+  git apply "$patch"
   run_tests "$LOG_DIR/$id.log"
   rc=$?
   failures=$(failed_tests)
@@ -144,9 +150,15 @@ for id in $IDS; do
     killed=$((killed + 1))
   else
     echo "| $id | $rule | $desc | COMPILE ERROR | see $LOG_DIR/$id.log |"
+    skipped=$((skipped + 1))
   fi
 done
 
 echo
-echo "Killed $killed of $total mutations."
+ran=$((total - skipped))
+if [ $skipped -gt 0 ]; then
+  echo "Killed $killed of $ran mutations ($skipped more did not apply or did not compile)."
+else
+  echo "Killed $killed of $total mutations."
+fi
 exit $status

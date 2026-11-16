@@ -25,13 +25,15 @@ What the numbers say:
 
 - **Line coverage didn't tell the suites apart.** Haiku and Opus both cover 96.9% of lines; one lets a
   bug through, the other doesn't. Sonnet's coverage stayed at 88.9% while the number of caught bugs went up.
-- **The bugs that got through were edge cases in the test data, not missing tests.** Two suites
+- **The bugs that got through were tests aimed at the wrong thing, not missing tests.** Two suites
   tested "a rejected code keeps the previous coupon" starting from a cart with *no* coupon applied, so
   dropping the coupon changed nothing they could see. One suite tested the discount row by passing the
-  flag by hand, never through the screen that decides it.
+  flag by hand; it rendered the screen that decides the flag in ten other tests, but never with a
+  discount.
 - **Asking the agent to break each rule itself works for rules written as code.** It found and fixed
   the Compose wiring gap. It did not find the rule enforced by *omission* (the reducer simply never
-  touches the applied coupon): there is no line to break, so the agent reported everything as caught.
+  touches the applied coupon): breaking it means adding code rather than changing a line, and the
+  agent reported everything as caught. Other agents did catch it, so this is one run, not a law.
 
 Full tables, the exact prompts and every agent's own report are in [`experiment/`](experiment/).
 
@@ -81,7 +83,8 @@ The same `MUTATIONS_DIR` works on `v2-feature`.
 - One run per suite, no re-rolls. Tests that failed on correct code would have been removed and
   listed; none did. No agent changed production code outside its ticket.
 - The protocol was committed before each run, including the extra arms, which were added after the
-  first result: [`experiment/protocol.md`](experiment/protocol.md).
+  first result: [`experiment/protocol.md`](experiment/protocol.md). One follow-up run (v2 on Sonnet's
+  suite) was decided after seeing the arm results and is marked as such.
 - The author wrote an [oracle suite](experiment/oracle/) to prove each mutation is a real bug.
   It never ran in any measurement.
 

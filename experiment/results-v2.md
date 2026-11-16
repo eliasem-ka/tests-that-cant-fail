@@ -18,11 +18,15 @@ M15 (the screen stops passing `showDiscountRow`) is now caught: the agent broke 
 argument and added a test that renders `CheckoutScreen` instead of `QuoteSummary` alone.
 
 M09 (a rejected code also removes the coupon already applied) still survives, and the agent's
-report says every rule is caught. Both are true from where it stood. The rule "a rejected code keeps
-the previous coupon" is enforced by what the reducer **doesn't** do: the `CouponRejected` branch
-never touches `appliedCoupon`. There is no line to break, so a method that starts from "find the line
-that makes the rule true" can't find it. The agent broke the lines that exist (the error and the flag)
-and they were caught. The Arm B agent caught the same rule because its ticket stated it.
+report says every rule is caught. The rule "a rejected code keeps the previous coupon" is enforced by
+what the reducer **doesn't** do: the `CouponRejected` branch never touches `appliedCoupon`. Breaking
+it means adding code, while the prompt's examples (flip, drop, swap, return the default) all change or
+remove existing code. The agent broke the lines that exist (the error and the flag) and they were
+caught.
+
+It isn't undetectable: Opus caught M09 in v1 with the plain prompt, and the Arm B v2 agent broke this
+rule by adding code (its report: "L15 clear the coupon and re-price"), because its ticket stated the
+rule. One run each, so this is an observation, not a law.
 
 Kover didn't move (88.9% before and after) while protection went from 13 to 14 of 15.
 
